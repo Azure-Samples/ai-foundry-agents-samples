@@ -22,7 +22,7 @@ as needed, and return responses.
 
     
 load_dotenv()
-weather_mcp_server_url = api_key=os.getenv("WEATHER_MCP_SERVER_URL")
+weather_mcp_server_url = os.getenv("WEATHER_MCP_SERVER_URL")
 
 # System message defining the behavior and persona of the chat bot.
 system_message = """
