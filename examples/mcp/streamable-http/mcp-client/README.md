@@ -1,6 +1,9 @@
 # Streamable HTTP MCP Client using Semantic Kernel
 
-## Running locally 
+## Running the MCP Client
+
+Save th file `.env_sample` as `.env` and update the environment variables. 
+
 Run the following commands
 ```
 cd examples/mcp/streamable-http/mcp-client 
