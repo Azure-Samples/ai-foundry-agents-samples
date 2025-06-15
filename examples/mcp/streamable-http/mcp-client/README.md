@@ -2,7 +2,7 @@
 
 ## Running the MCP Client
 
-Save th file `.env_sample` as `.env` and update the environment variables. 
+Save the file `.env_sample` as `.env` and update the environment variables. 
 
 Run the following commands
 ```
