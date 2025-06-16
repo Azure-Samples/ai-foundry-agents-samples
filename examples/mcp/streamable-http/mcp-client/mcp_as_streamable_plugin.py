@@ -20,9 +20,25 @@ The chatbot is designed to interact with the user, call MCP tools
 as needed, and return responses.
 """
 
-    
+# Step 1: Configure the logging module
+logging.basicConfig(
+    level=logging.INFO,  # Set the desired logging level (DEBUG, INFO, WARNING, etc.)
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+
+# Step 2: Create a logger
+logger = logging.getLogger("mcp.streamable-http.mcp-client")
+
 load_dotenv()
 weather_mcp_server_url = os.getenv("WEATHER_MCP_SERVER_URL")
+api_key=os.getenv("AZURE_OPENAI_API_KEY")
+endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
+deployment_name=os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT_NAME")
+api_version=os.getenv("AZURE_OPENAI_API_VERSION")
+logger.info(f"Using MCP server URL: {weather_mcp_server_url}")
+logger.info(f"Using Azure OpenAI endpoint: {endpoint}")
+logger.info(f"Using Azure OpenAI deployment name: {deployment_name}")
+logger.info(f"Using Azure OpenAI API version: {api_version}")
 
 # System message defining the behavior and persona of the chat bot.
 system_message = """
@@ -30,17 +46,14 @@ You are a chat bot. And you help users interact with weather services.
 You can call functions to get the information you need.
 """
 
-setup_logging()
-logging.getLogger("semantic_kernel.connectors.mcp").setLevel(logging.DEBUG)
-
 # Create and configure the kernel.
 kernel = Kernel()
 
 chat_service = AzureChatCompletion(
-    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-    endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
-    api_version=os.getenv("AZURE_OPENAI_API_VERSION")
+    api_key=api_key,
+    endpoint=endpoint,
+    deployment_name=deployment_name,
+    api_version=api_version
 )
 settings = AzureChatPromptExecutionSettings()
 
