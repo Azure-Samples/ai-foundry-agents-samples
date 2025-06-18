@@ -4,9 +4,8 @@
 Run the following commands
 ```
 cd examples/mcp/streamable-http/mcp-server 
-uv init
 uv venv
-uv add mcp
+uv sync
 uv run weather.py
 ```
 
@@ -25,10 +24,10 @@ In the URL enter: http://localhost:8001/mcp and click Connect.
 Run the following commands
 ```
 az containerapp up \
-    -g <RESOURCE_GROUP_NAME> \
-    -n streamable-weather-mcp \
+    --resource-group <RESOURCE_GROUP_NAME> \
+    --name streamable-weather-mcp \
     --environment mcp \
-    -l <REGION> \
+    --location <REGION> \
     --source .
 ```
 
