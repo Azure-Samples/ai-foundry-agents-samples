@@ -7,3 +7,4 @@ This folder contains MCP server using Streamable HTTP transport Python sample co
 ## Project folders
 - `mcp-server` - MCP server using Streamable HTTP transport Python sample code.
 - `mcp-client` - MCP Client implemented with Semantic Kernel Python SDK. 
+- `ai-foundry-agent` - Azure AI Foundry Agent Service MCP Client.
