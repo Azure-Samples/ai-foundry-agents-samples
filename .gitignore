@@ -403,3 +403,4 @@ examples/.DS_Store
 examples/mcp/.DS_Store
 examples/mcp/filesystem_example/.env
 examples/mcp/streamable-http/mcp-client/.env
+examples/mcp/streamable-http/ai-foundry-agent/.env
