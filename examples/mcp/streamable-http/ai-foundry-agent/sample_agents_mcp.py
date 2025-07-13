@@ -26,6 +26,7 @@ import json
 from azure.ai.agents.models import MessageTextContent, ListSortOrder
 from azure.ai.projects import AIProjectClient
 from azure.identity import DefaultAzureCredential
+from azure.ai.agents.models import McpTool, RequiredMcpToolCall, SubmitToolApprovalAction, ToolApproval
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -36,58 +37,97 @@ project_client = AIProjectClient(
     api_version="2025-05-15-preview"
 )
 
+# [START create_agent_with_mcp_tool]
+# Initialize agent MCP tool
+mcp_tool = McpTool(
+    server_label="weather",
+    server_url=os.environ["WEATHER_MCP_SERVER_URL"]
+)
+
+# Create agent with MCP tool and process agent run
 with project_client:
-    agent = project_client.agents.create_agent(
+    agents_client = project_client.agents
+
+    # Create a new agent.
+    # NOTE: To reuse existing agent, fetch it with get_agent(agent_id)
+    agent = agents_client.create_agent(
         model=os.environ["MODEL_DEPLOYMENT_NAME"],
-        name="my-mcp-agent", 
-        instructions="You are a helpful assistant. Use the tools provided to answer the user's questions. Be sure to cite your sources.",
-        tools=[
-            {
-                "type": "mcp",
-		        "server_label": "weather",
-                "server_url": os.environ["WEATHER_MCP_SERVER_URL"],
-                "require_approval": "never"
-            }
-        ],
-        tool_resources=None
+        name="my-weather-mcp-agent",
+        instructions="You are a helpful agent that can use MCP tools to assist users. Use the available MCP tools to answer questions and perform tasks.",
+        tools=mcp_tool.definitions,
     )
-    # [END upload_file_and_create_agent_with_code_interpreter]
-    print(f"Created agent, agent ID: {agent.id}")
+    # [END create_agent_with_mcp_tool]
 
-    thread = project_client.agents.threads.create()
-    print(f"Created thread, thread ID: {thread.id}")
+    print(f"Created agent, ID: {agent.id}")
+    print(f"MCP Server: {mcp_tool.server_label} at {mcp_tool.server_url}")
 
-    message = project_client.agents.messages.create(
-        thread_id=thread.id, role="user", content="weather alerts in CA",
+    # Create thread for communication
+    thread = agents_client.threads.create()
+    print(f"Created thread, ID: {thread.id}")
+
+    # Create message to thread
+    message = agents_client.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content="please list the weather alerts in NY",
     )
-    print(f"Created message, message ID: {message.id}")
+    print(f"Created message, ID: {message.id}")
 
-    run = project_client.agents.runs.create(thread_id=thread.id, agent_id=agent.id)
+    # [START handle_tool_approvals]
+    mcp_tool.set_approval_mode("never")
+    run = agents_client.runs.create(thread_id=thread.id, agent_id=agent.id, tool_resources=mcp_tool.resources)
+    print(f"Created run, ID: {run.id}")
 
-    
-    # Poll the run as long as run status is queued or in progress
     while run.status in ["queued", "in_progress", "requires_action"]:
-        # Wait for a second
         time.sleep(1)
-        run = project_client.agents.runs.get(thread_id=thread.id, run_id=run.id)
-        print(f"Run status: {run.status}")
+        run = agents_client.runs.get(thread_id=thread.id, run_id=run.id)
 
+        if run.status == "requires_action" and isinstance(run.required_action, SubmitToolApprovalAction):
+            tool_calls = run.required_action.submit_tool_approval.tool_calls
+            if not tool_calls:
+                print("No tool calls provided - cancelling run")
+                agents_client.runs.cancel(thread_id=thread.id, run_id=run.id)
+                break
+
+        print(f"Current run status: {run.status}")
+        # [END handle_tool_approvals]
+
+    print(f"Run completed with status: {run.status}")
     if run.status == "failed":
-        print(f"Run error: {run.last_error}")
+        print(f"Run failed: {run.last_error}")
 
-    run_steps = project_client.agents.run_steps.list(thread_id=thread.id, run_id=run.id)
+    # Display run steps and tool calls
+    run_steps = agents_client.run_steps.list(thread_id=thread.id, run_id=run.id)
+
+    # Loop through each step
     for step in run_steps:
-        print(f"Run step: {step.id}, status: {step.status}, type: {step.type}")
-        if step.type == "tool_calls":
-            print(f"Tool call details:")
-            for tool_call in step.step_details.tool_calls:
-                print(json.dumps(tool_call.as_dict(), indent=2))
+        print(f"Step {step['id']} status: {step['status']}")
 
-    messages = project_client.agents.messages.list(thread_id=thread.id, order=ListSortOrder.ASCENDING)
-    for data_point in messages:
-        last_message_content = data_point.content[-1]
-        if isinstance(last_message_content, MessageTextContent):
-            print(f"{data_point.role}: {last_message_content.text.value}")
+        # Check if there are tool calls in the step details
+        step_details = step.get("step_details", {})
+        tool_calls = step_details.get("tool_calls", [])
 
-    project_client.agents.delete_agent(agent.id)
+        if tool_calls:
+            print("  MCP Tool calls:")
+            for call in tool_calls:
+                print(f"    Tool Call ID: {call.get('id')}")
+                print(f"    Type: {call.get('type')}")
+
+        print()  # add an extra newline between steps
+
+    # Fetch and log all messages
+    messages = agents_client.messages.list(thread_id=thread.id)
+    print("\nConversation:")
+    print("-" * 50)
+    for msg in messages:
+        if msg.text_messages:
+            last_text = msg.text_messages[-1]
+            print(f"{msg.role.upper()}: {last_text.text.value}")
+            print("-" * 50)
+
+    # Example of dynamic tool management
+    print(f"\nDemonstrating dynamic tool management:")
+    print(f"Current allowed tools: {mcp_tool.allowed_tools}")
+
+    agents_client.delete_agent(agent.id)
     print("Deleted agent")
