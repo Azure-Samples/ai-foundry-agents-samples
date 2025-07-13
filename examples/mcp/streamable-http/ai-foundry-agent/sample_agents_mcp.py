@@ -33,8 +33,7 @@ load_dotenv()
 
 project_client = AIProjectClient(
     endpoint=os.environ["PROJECT_ENDPOINT"],
-    credential=DefaultAzureCredential(),
-    api_version="2025-05-15-preview"
+    credential=DefaultAzureCredential()
 )
 
 # [START create_agent_with_mcp_tool]
