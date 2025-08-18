@@ -1,5 +1,7 @@
 # MCP Client for Pet Store MCP Server on Azure API Management, using Semantic Kernel
 
+**Read the Blog Post**: https://medium.com/@eitansela/expose-your-rest-api-as-an-mcp-server-in-minutes-with-azure-api-management-1deb51142a04
+
 ## Running the MCP Client
 
 Save the file `.env_sample` as `.env` and update the environment variables. 
