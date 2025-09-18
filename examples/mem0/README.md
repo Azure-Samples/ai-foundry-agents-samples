@@ -1,4 +1,4 @@
-# Long Term Memory Agent using Azure AI Foundry and Azure AI Search
+# Long Term Memory Agent using mem0, Azure AI Foundry and Azure AI Search
 
 ## Running the sample code
 
