@@ -1,0 +1,13 @@
+[project]
+name = "mem0"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "azure-identity>=1.25.0",
+    "azure-search-documents>=11.5.3",
+    "mem0ai>=0.1.117",
+    "openai>=1.99.9",
+    "python-dotenv>=1.1.1",
+]
