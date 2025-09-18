@@ -95,7 +95,7 @@ def chat_with_memories(message: str, user_id: str = "default_user") -> str:
 
 def main():
 
-    # This is a demo user ID. In a real application, use actual user IDs.
+    # This is a demo user ID. In a real application, use actual user IDs
     demo_user_id = "user_123" 
 
     print("Chat with AI (type 'exit' to quit)")
