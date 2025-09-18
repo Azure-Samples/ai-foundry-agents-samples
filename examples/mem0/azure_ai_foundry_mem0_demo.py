@@ -8,8 +8,9 @@ load_dotenv()
 llm_azure_openai_api_key = os.environ["LLM_AZURE_OPENAI_API_KEY"]
 llm_azure_chat_completion_deployment = os.environ["LLM_AZURE_CHAT_COMPLETION_DEPLOYMENT"]
 llm_azure_endpoint = os.environ["LLM_AZURE_ENDPOINT"]
-llm_azure_api_version = os.environ["LLM_AZURE_API_VERSION"]
+llm_azure_chat_completion_api_version = os.environ["LLM_AZURE_CHAT_COMPLETION_API_VERSION"]
 llm_azure_embedding_deployment = os.environ["LLM_AZURE_EMBEDDING_DEPLOYMENT"]
+llm_azure_embedding_api_version = os.environ["LLM_AZURE_EMBEDDING_API_VERSION"]
 search_service_name = os.environ["SEARCH_SERVICE_NAME"]
 search_service_api_key = os.environ["SEARCH_SERVICE_API_KEY"]
 print("Using Azure OpenAI deployment:", llm_azure_chat_completion_deployment)
@@ -20,7 +21,7 @@ print("Using Azure AI Search service:", search_service_name)
 azure_openai_client = AzureOpenAI(
     azure_endpoint=llm_azure_endpoint,
     api_key=llm_azure_openai_api_key,
-    api_version=llm_azure_api_version
+    api_version=llm_azure_chat_completion_api_version
 )
 
 config = {
@@ -32,7 +33,7 @@ config = {
             "max_tokens": 2000,
             "azure_kwargs": {
                   "azure_deployment": llm_azure_chat_completion_deployment,
-                  "api_version": llm_azure_api_version,
+                  "api_version": llm_azure_chat_completion_api_version,
                   "azure_endpoint": llm_azure_endpoint,
                   "api_key": llm_azure_openai_api_key,
               }
@@ -44,7 +45,7 @@ config = {
             "model": llm_azure_embedding_deployment,
             "embedding_dims": 1536,
             "azure_kwargs": {
-                "api_version": "2024-10-21",
+                "api_version": llm_azure_embedding_api_version,
                 "azure_deployment": llm_azure_embedding_deployment,
                 "azure_endpoint": llm_azure_endpoint,
                 "api_key": llm_azure_openai_api_key,
