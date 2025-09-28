@@ -1,70 +1,29 @@
 from mem0 import Memory
-from dotenv import load_dotenv
 from openai import AzureOpenAI
-import os
 
-load_dotenv()
-
-llm_azure_openai_api_key = os.environ["LLM_AZURE_OPENAI_API_KEY"]
-llm_azure_chat_completion_deployment = os.environ["LLM_AZURE_CHAT_COMPLETION_DEPLOYMENT"]
-llm_azure_endpoint = os.environ["LLM_AZURE_ENDPOINT"]
-llm_azure_chat_completion_api_version = os.environ["LLM_AZURE_CHAT_COMPLETION_API_VERSION"]
-llm_azure_embedding_deployment = os.environ["LLM_AZURE_EMBEDDING_DEPLOYMENT"]
-llm_azure_embedding_api_version = os.environ["LLM_AZURE_EMBEDDING_API_VERSION"]
-search_service_name = os.environ["SEARCH_SERVICE_NAME"]
-search_service_api_key = os.environ["SEARCH_SERVICE_API_KEY"]
-print("Using Azure OpenAI deployment:", llm_azure_chat_completion_deployment)
-print("Using Azure AI Search service:", search_service_name)
-
-
-# Create Azure OpenAI client
-azure_openai_client = AzureOpenAI(
-    azure_endpoint=llm_azure_endpoint,
-    api_key=llm_azure_openai_api_key,
-    api_version=llm_azure_chat_completion_api_version
+# Load reusable Azure configuration and Mem0 wiring.
+from mem0_config import (
+    CONFIG,
+    LLM_AZURE_CHAT_COMPLETION_API_VERSION,
+    LLM_AZURE_CHAT_COMPLETION_DEPLOYMENT,
+    LLM_AZURE_OPENAI_ENDPOINT,
+    LLM_AZURE_OPENAI_API_KEY,
+    SEARCH_SERVICE_NAME,
 )
 
-config = {
-    "llm": {
-        "provider": "azure_openai",
-        "config": {
-            "model": llm_azure_chat_completion_deployment,
-            "temperature": 0.1,
-            "max_tokens": 2000,
-            "azure_kwargs": {
-                  "azure_deployment": llm_azure_chat_completion_deployment,
-                  "api_version": llm_azure_chat_completion_api_version,
-                  "azure_endpoint": llm_azure_endpoint,
-                  "api_key": llm_azure_openai_api_key,
-              }
-        }
-    },
-    "embedder": {
-        "provider": "azure_openai",
-        "config": {
-            "model": llm_azure_embedding_deployment,
-            "embedding_dims": 1536,
-            "azure_kwargs": {
-                "api_version": llm_azure_embedding_api_version,
-                "azure_deployment": llm_azure_embedding_deployment,
-                "azure_endpoint": llm_azure_endpoint,
-                "api_key": llm_azure_openai_api_key,
-            },
-        },
-    },
-    "vector_store": {
-                "provider": "azure_ai_search",
-                "config": {
-                    "service_name": search_service_name,
-                    "api_key": search_service_api_key,
-                    "collection_name": "my-demo-mem0-agent-memories",
-                    "embedding_model_dims": 1536,
-                    "compression_type": "binary",
-                },
-            },
-}
+print("Using Azure OpenAI deployment:", LLM_AZURE_CHAT_COMPLETION_DEPLOYMENT)
+print("Using Azure AI Search service:", SEARCH_SERVICE_NAME)
 
-memory = Memory.from_config(config)
+
+# Create Azure OpenAI client that powers chat completions.
+azure_openai_client = AzureOpenAI(
+    azure_endpoint=LLM_AZURE_OPENAI_ENDPOINT,
+    api_key=LLM_AZURE_OPENAI_API_KEY,
+    api_version=LLM_AZURE_CHAT_COMPLETION_API_VERSION,
+)
+
+# Build the Mem0 memory interface using the shared config block.
+memory = Memory.from_config(CONFIG)
 
 
 def chat_with_memories(message: str, user_id: str = "default_user") -> str:
@@ -81,7 +40,7 @@ def chat_with_memories(message: str, user_id: str = "default_user") -> str:
         {"role": "user", "content": message},
     ]
     response = azure_openai_client.chat.completions.create(
-        model=llm_azure_chat_completion_deployment, messages=messages
+        model=LLM_AZURE_CHAT_COMPLETION_DEPLOYMENT, messages=messages
     )
     assistant_response = response.choices[0].message.content
 
