@@ -5,6 +5,7 @@ import asyncio
 from agent_framework import ChatAgent, MCPStreamableHTTPTool
 from agent_framework.azure import AzureAIAgentClient
 from azure.identity.aio import AzureCliCredential
+
 import os
 from dotenv import load_dotenv
 
@@ -43,14 +44,14 @@ async def main() -> None:
                 agent_name="MyTavilyWebSearchAgent",
                 should_cleanup_agent=False,  # Set to False if you want to disable automatic agent cleanup
             ),
-            instructions="You are a helpful assistant that can help answering questions with web search using Taviliy MCP Server.",
+            instructions="You are a helpful assistant that can help answering questions related to web search using Taviliy MCP Server.",
             tools=MCPStreamableHTTPTool(  # Tools defined at agent creation
                 name="Taviliy",
                 url=os.environ["TAVILY_MCP_SERVER_URL"],
             ),
         ) as agent,
     ):
-        query = "Search for news articles about AI startups from the last 7 days."
+        query = "Search for articles about AI startups"
         print(f"User: {query}")
         result = await agent.run(query)
         print(f"{agent.name}: {result}\n")
