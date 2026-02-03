@@ -412,3 +412,5 @@ examples/mcp/streamable-http/ai-foundry-agent/list_agents.py
 examples/mcp/streamable-http/mcp-client/coralogix_mcp.py
 examples/mcp/streamable-http/mcp-client/playwright_mcp.py
 examples/mem0/.env
+examples/mcp/tavily/.env
+examples/mcp/tavily/.venv
